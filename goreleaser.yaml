@@ -1,0 +1,35 @@
+before:
+  hooks:
+    - go mod tidy
+    - go get -u -v github.com/golang/protobuf/protoc-gen-go google.golang.org/grpc/cmd/protoc-gen-go-grpc
+    - protoc --proto_path=proto --go_out=pkg/worker --grpc_go_out=pkg/worker --go_opt=paths=source_relative worker.proto
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm
+      - arm64
+    goarm:
+      - 6
+      - 7
+
+archives:
+ -
+  format: tar.gz
+  name_template: "{{.Os}}-{{.Arch}}{{if .Arm}}v{{.Arm}}{{end}}-{{ .ProjectName }}"
+  replacements:
+    darwin: Darwin
+    linux: Linux
+    windows: Windows
+  format_overrides:
+    - goos: windows
+      format: zip
+
+checksum:
+  name_template: 'checksums.txt'
